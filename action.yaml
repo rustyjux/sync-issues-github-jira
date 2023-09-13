@@ -1,4 +1,5 @@
 name: 'Github Jira Sync'
+description: "Syncs github issues to jira"
 inputs:
   webhook-url:
     description: >
