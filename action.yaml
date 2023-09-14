@@ -76,7 +76,7 @@ runs:
         component: ${{ inputs.component }}
         commentAuthor: ${{ github.actor }}
         comment: ${{ github.event.comment.body }}
-        labels: ${{ github.event.issue.labels.*.name }}
+        issueLabels: ${{ github.event.issue.labels }}
       run: |
         set -eux
 
@@ -135,8 +135,8 @@ runs:
                   --arg description "$description" \
                   --arg component "$component" \
                   --arg commentContent "$commentContent" \
-                  --arg labels "$labels" \
-                  '{data: {id: $id, action: $action, title: $title, description: $description, component: $component, commentContent: $commentContent, labels: $labels}}')
+                  --arg issueLabels "$issueLabels" \
+                  '{data: {id: $id, action: $action, title: $title, description: $description, component: $component, commentContent: $commentContent, issueLabels: $issueLabels}}')
         curl -X POST -H 'Content-type: application/json' --data "${data}" '${{ inputs.webhook-url }}'
 
       shell: bash
