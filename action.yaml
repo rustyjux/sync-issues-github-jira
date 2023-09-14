@@ -17,9 +17,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    #- name: Dump GitHub context
-    #  run: echo '${{ toJSON(github) }}'
-    #  shell: bash
+    - name: Dump GitHub context
+      run: echo '${{ toJSON(github) }}'
+      shell: bash
     - name: restrict action to labelled issues and issue comments
       run: |
         set -eux
@@ -76,7 +76,7 @@ runs:
         component: ${{ inputs.component }}
         commentAuthor: ${{ github.actor }}
         comment: ${{ github.event.comment.body }}
-        issueLabels: ${{ github.event.issue.labels }}
+        issueLabels: ${{ toJSON(github.event.issue.labels.*.name) }}
       run: |
         set -eux
 
