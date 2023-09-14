@@ -108,7 +108,7 @@ runs:
             action=Create
           elif [ ${{ github.event.action }} == "assigned" ] || [ ${{ github.event.action }} == "unassigned" ]; then
             action=Assignment
-            commentContent="Updated Assignees ${{ github.event.issue.assignees.*.name }}"
+            commentContent="Updated Assignees ${{ toJSON(github.event.issue.assignees.*.name) }}"
           elif [ ${{ github.event.action }} == "reopened" ]; then
             action=Reopen
           elif [ ${{ github.event.action }} == "deleted" ] || [ ${{ github.event.action }} == "unlabeled" ]; then
