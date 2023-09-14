@@ -77,6 +77,7 @@ runs:
         commentAuthor: ${{ github.actor }}
         comment: ${{ github.event.comment.body }}
         issueLabels: ${{ toJSON(github.event.issue.labels.*.name) }}
+        issueAssignees: ${{ toJSON(github.event.issue.assignees.*.login) }}
       run: |
         set -eux
 
@@ -108,7 +109,7 @@ runs:
             action=Create
           elif [ ${{ github.event.action }} == "assigned" ] || [ ${{ github.event.action }} == "unassigned" ]; then
             action=Assignment
-            commentContent="Updated Assignees ${{ toJSON(github.event.issue.assignees.*.name) }}"
+            commentContent="Updated Assignees ${{ toJSON(github.event.issue.assignees.*.login) }}"
           elif [ ${{ github.event.action }} == "reopened" ]; then
             action=Reopen
           elif [ ${{ github.event.action }} == "deleted" ] || [ ${{ github.event.action }} == "unlabeled" ]; then
@@ -128,7 +129,7 @@ runs:
         ${comment}"
         fi
 
-        echo "PUSHING: $id $action $title $description $component $commentContent $issueLabels"
+        echo "PUSHING: $id $action $title $description $component $commentContent $issueLabels $issueAssignees"
 
         # Push to Jira as a json data format.
         data=$(jq -n \
@@ -139,7 +140,8 @@ runs:
                   --arg component "$component" \
                   --arg commentContent "$commentContent" \
                   --arg issueLabels "$issueLabels" \
-                  '{data: {id: $id, action: $action, title: $title, description: $description, component: $component, commentContent: $commentContent, issueLabels: $issueLabels}}')
+                  --arg issueAssignees "$issueAssignees" \
+                  '{data: {id: $id, action: $action, title: $title, description: $description, component: $component, commentContent: $commentContent, issueLabels: $issueLabels, issueAssignees: $issueAssignees}}')
         curl -X POST -H 'Content-type: application/json' --data "${data}" '${{ inputs.webhook-url }}'
 
       shell: bash
