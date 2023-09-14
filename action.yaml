@@ -106,6 +106,9 @@ runs:
           action=Update
           if [ ${{ github.event.action }} == "labeled" ]; then
             action=Create
+          elif [ ${{ github.event.action }} == "assigned" ] || [ ${{ github.event.action }} == "unassigned" ]; then
+            action=Assignment
+            commentContent="Updated Assignees ${{ github.event.issue.assignees.*.name }}"
           elif [ ${{ github.event.action }} == "reopened" ]; then
             action=Reopen
           elif [ ${{ github.event.action }} == "deleted" ] || [ ${{ github.event.action }} == "unlabeled" ]; then
@@ -125,7 +128,7 @@ runs:
         ${comment}"
         fi
 
-        echo "PUSHING: $id $action $title $description $component $commentContent"
+        echo "PUSHING: $id $action $title $description $component $commentContent $issueLabels"
 
         # Push to Jira as a json data format.
         data=$(jq -n \
