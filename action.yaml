@@ -76,7 +76,7 @@ runs:
         component: ${{ inputs.component }}
         commentAuthor: ${{ github.actor }}
         comment: ${{ github.event.comment.body }}
-        labels: ${{ github.event.issue.labels }}
+        labels: ${{ github.event.issue.labels.*.name }}
       run: |
         set -eux
 
