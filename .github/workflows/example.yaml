@@ -5,8 +5,17 @@ jobs:
   sync-issues:
     name: Sync issues to Jira
     runs-on: ubuntu-latest
+    permissions:
+      actions: write    
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
           webhook-url: ${{ secrets.JIRA_WEBHOOK_URL }}
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 5
