@@ -81,20 +81,36 @@ runs:
       run: |
         set -eux
 
-        # Convert markdown to JIRA using pandoc
-        if ! command -v pandoc &> /dev/null; then
-          echo "Installing pandoc..."
-          sudo apt-get update && sudo apt-get install -y pandoc
-        fi
+        convert_to_jira() {
+          local input="$1"
+          # Convert GitHub Markdown checkboxes to Jira task lists
+          input=$(echo "$input" | sed -E 's/- \[ \]/(*)/g' | sed -E 's/- \[x\]/(\/)/g')
+          
+          # Convert headers
+          input=$(echo "$input" | sed -E 's/^# (.+)/h1. \1/g')
+          input=$(echo "$input" | sed -E 's/^## (.+)/h2. \1/g')
+          input=$(echo "$input" | sed -E 's/^### (.+)/h3. \1/g')
+          
+          # Convert bullet lists with proper indentation
+          input=$(echo "$input" | sed -E 's/^  - /* /g' | sed -E 's/^    - /** /g' | sed -E 's/^      - /*** /g')
+          
+          # Convert inline code
+          input=$(echo "$input" | sed -E 's/`([^`]+)`/{{"\1"}}/g')
+          
+          # Convert code blocks
+          input=$(echo "$input" | awk '/^```/{if (c==0) {print "{code}"; c=1} else {print "{code}"; c=0} next} 1')
+          
+          # Convert links
+          input=$(echo "$input" | sed -E 's/\[([^\]]+)\]\(([^\)]+)\)/[\1|\2]/g')
+          
+          # Convert images
+          input=$(echo "$input" | sed -E 's/!\[([^\]]*)\]\(([^\)]+)\)/!\2|thumbnail!/g')
+          
+          echo "$input"
+        }
 
-        TMPDIR=$(mktemp -d)
-        trap 'rm -rf -- "$TMPDIR"' EXIT
-
-        echo "${body}" > $TMPDIR/body.md
-        echo "${comment}" > $TMPDIR/comment.md
-
-        body=$(pandoc -f markdown -t jira $TMPDIR/body.md)
-        comment=$(pandoc -f markdown -t jira $TMPDIR/comment.md)
+        body=$(convert_to_jira "$body")
+        comment=$(convert_to_jira "$comment")
 
         description="${body}
 
