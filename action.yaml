@@ -97,17 +97,20 @@ runs:
           input=$(echo "$input" | sed -E 's/^- /* /g' | sed -E 's/^  - /** /g' | sed -E 's/^    - /*** /g')
           input=$(echo "$input" | sed -E 's/^o /** /g' | sed -E 's/^  o /*** /g')
           
-          # Convert inline code
-          input=$(echo "$input" | sed -E 's/`([^`]+)`/{{"\1"}}/g')
+          # Convert inline code (without quotes)
+          input=$(echo "$input" | sed -E 's/`([^`]+)`/{{({\1})}}/g')
           
           # Convert code blocks
           input=$(echo "$input" | awk '/^```/{if (c==0) {print "{code}"; c=1} else {print "{code}"; c=0} next} 1')
           
-          # Convert links
+          # Convert links (GitHub format to Jira format)
           input=$(echo "$input" | sed -E 's/\[([^\]]+)\]\(([^\)]+)\)/[\1|\2]/g')
           
-          # Convert images
+          # Convert images (GitHub format to Jira format)
           input=$(echo "$input" | sed -E 's/!\[([^\]]*)\]\(([^\)]+)\)/!\2!/g')
+          
+          # Convert remaining plain URLs to Jira format
+          input=$(echo "$input" | sed -E 's/(^|[^[])(https?:\/\/[^\s]+)/\1[\2]/g')
           
           echo "$input"
         }
