@@ -83,8 +83,9 @@ runs:
 
         convert_to_jira() {
           local input="$1"
+          
           # Convert GitHub Markdown checkboxes to Jira task lists
-          input=$(echo "$input" | sed -E 's/- \[ \]/(*)/g' | sed -E 's/- \[x\]/(\/)/g')
+          input=$(echo "$input" | sed -E 's/- \[ \]/(!) /g' | sed -E 's/- \[x\]/(\/)/g')
           
           # Convert headers
           input=$(echo "$input" | sed -E 's/^# (.+)/h1. \1/g')
@@ -92,7 +93,9 @@ runs:
           input=$(echo "$input" | sed -E 's/^### (.+)/h3. \1/g')
           
           # Convert bullet lists with proper indentation
-          input=$(echo "$input" | sed -E 's/^  - /* /g' | sed -E 's/^    - /** /g' | sed -E 's/^      - /*** /g')
+          input=$(echo "$input" | sed -E 's/^•/* /g' | sed -E 's/^  •/** /g' | sed -E 's/^    •/*** /g')
+          input=$(echo "$input" | sed -E 's/^- /* /g' | sed -E 's/^  - /** /g' | sed -E 's/^    - /*** /g')
+          input=$(echo "$input" | sed -E 's/^o /** /g' | sed -E 's/^  o /*** /g')
           
           # Convert inline code
           input=$(echo "$input" | sed -E 's/`([^`]+)`/{{"\1"}}/g')
@@ -104,7 +107,7 @@ runs:
           input=$(echo "$input" | sed -E 's/\[([^\]]+)\]\(([^\)]+)\)/[\1|\2]/g')
           
           # Convert images
-          input=$(echo "$input" | sed -E 's/!\[([^\]]*)\]\(([^\)]+)\)/!\2|thumbnail!/g')
+          input=$(echo "$input" | sed -E 's/!\[([^\]]*)\]\(([^\)]+)\)/!\2!/g')
           
           echo "$input"
         }
